@@ -4,7 +4,7 @@
 
 import * as opentype from 'opentype.js';
 
-const DEFAULT_FONT = require('path').join(__dirname, '../fonts/ipag.ttf');
+const DEFAULT_FONT = require('path').join(process.cwd(), '../fonts/ipag.ttf');
 
 // Private method
 
@@ -40,7 +40,7 @@ export default class TextToSVG {
   getWidth(text, options) {
     const fontSize = options.fontSize || 72;
     const kerning = 'kerning' in options ? options.kerning : true;
-    const fontScale = 1 / this.font.unitsPerEm * fontSize;
+    const fontScale = (1 / this.font.unitsPerEm) * fontSize;
 
     let width = 0;
     const glyphs = this.font.stringToGlyphs(text);
@@ -66,7 +66,7 @@ export default class TextToSVG {
   }
 
   getHeight(fontSize) {
-    const fontScale = 1 / this.font.unitsPerEm * fontSize;
+    const fontScale = (1 / this.font.unitsPerEm) * fontSize;
     return (this.font.ascender - this.font.descender) * fontScale;
   }
 
@@ -77,7 +77,7 @@ export default class TextToSVG {
     const width = this.getWidth(text, options);
     const height = this.getHeight(fontSize);
 
-    const fontScale = 1 / this.font.unitsPerEm * fontSize;
+    const fontScale = (1 / this.font.unitsPerEm) * fontSize;
     const ascender = this.font.ascender * fontScale;
     const descender = this.font.descender * fontScale;
 
@@ -123,7 +123,7 @@ export default class TextToSVG {
       width,
       height,
       ascender,
-      descender,
+      descender
     };
   }
 
@@ -133,7 +133,11 @@ export default class TextToSVG {
     const letterSpacing = 'letterSpacing' in options ? options.letterSpacing : false;
     const tracking = 'tracking' in options ? options.tracking : false;
     const metrics = this.getMetrics(text, options);
-    const path = this.font.getPath(text, metrics.x, metrics.baseline, fontSize, { kerning, letterSpacing, tracking });
+    const path = this.font.getPath(text, metrics.x, metrics.baseline, fontSize, {
+      kerning,
+      letterSpacing,
+      tracking
+    });
 
     return path.toPathData();
   }
@@ -153,7 +157,9 @@ export default class TextToSVG {
 
   getSVG(text, options = {}) {
     const metrics = this.getMetrics(text, options);
-    let svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${metrics.width}" height="${metrics.height}">`;
+    let svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${
+      metrics.width
+    }" height="${metrics.height}">`;
     svg += this.getPath(text, options);
     svg += '</svg>';
 
@@ -168,20 +174,26 @@ export default class TextToSVG {
     const metrics = this.getMetrics(text, options);
     const box = {
       width: Math.max(metrics.x + metrics.width, 0) - Math.min(metrics.x, 0),
-      height: Math.max(metrics.y + metrics.height, 0) - Math.min(metrics.y, 0),
+      height: Math.max(metrics.y + metrics.height, 0) - Math.min(metrics.y, 0)
     };
     const origin = {
       x: box.width - Math.max(metrics.x + metrics.width, 0),
-      y: box.height - Math.max(metrics.y + metrics.height, 0),
+      y: box.height - Math.max(metrics.y + metrics.height, 0)
     };
 
     // Shift text based on origin
     options.x += origin.x;
     options.y += origin.y;
 
-    let svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${box.width}" height="${box.height}">`;
-    svg += `<path fill="none" stroke="red" stroke-width="1" d="M0,${origin.y}L${box.width},${origin.y}"/>`; // X Axis
-    svg += `<path fill="none" stroke="red" stroke-width="1" d="M${origin.x},0L${origin.x},${box.height}"/>`; // Y Axis
+    let svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${
+      box.width
+    }" height="${box.height}">`;
+    svg += `<path fill="none" stroke="red" stroke-width="1" d="M0,${origin.y}L${box.width},${
+      origin.y
+    }"/>`; // X Axis
+    svg += `<path fill="none" stroke="red" stroke-width="1" d="M${origin.x},0L${origin.x},${
+      box.height
+    }"/>`; // Y Axis
     svg += this.getPath(text, options);
     svg += '</svg>';
 
